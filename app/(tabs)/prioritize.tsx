@@ -1,23 +1,37 @@
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { ArrowUp, ArrowDown, Calendar, Clock } from 'lucide-react-native';
+import { useBucketListStore, type Priority } from '@/store/bucketList';
+
+type Filter = 'All' | Priority;
 
 export default function PrioritizeScreen() {
-  const tasks = [
-    {
-      id: 1,
-      title: "Learn Spanish",
-      priority: "High",
-      deadline: "March 2025",
-      timeRequired: "6 months",
-    },
-    {
-      id: 2,
-      title: "Run a Marathon",
-      priority: "Medium",
-      deadline: "September 2024",
-      timeRequired: "4 months",
-    },
-  ];
+  const [filter, setFilter] = useState<Filter>('All');
+  const { items, moveItem } = useBucketListStore();
+
+  const filteredItems = items.filter(item => 
+    filter === 'All' ? true : item.priority === filter
+  );
+
+  const getPriorityStyles = (priority: Priority) => {
+    switch (priority) {
+      case 'High':
+        return {
+          badge: styles.highPriority,
+          text: styles.highPriorityText
+        };
+      case 'Medium':
+        return {
+          badge: styles.mediumPriority,
+          text: styles.mediumPriorityText
+        };
+      case 'Low':
+        return {
+          badge: styles.lowPriority,
+          text: styles.lowPriorityText
+        };
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -27,51 +41,79 @@ export default function PrioritizeScreen() {
       </View>
 
       <View style={styles.filterContainer}>
-        <Pressable style={[styles.filterButton, styles.activeFilter]}>
-          <Text style={styles.activeFilterText}>All</Text>
-        </Pressable>
-        <Pressable style={styles.filterButton}>
-          <Text style={styles.filterText}>High Priority</Text>
-        </Pressable>
-        <Pressable style={styles.filterButton}>
-          <Text style={styles.filterText}>Medium</Text>
-        </Pressable>
+        {(['All', 'High', 'Medium', 'Low'] as const).map((filterOption) => (
+          <Pressable 
+            key={filterOption}
+            style={[
+              styles.filterButton,
+              filter === filterOption && styles.activeFilter
+            ]}
+            onPress={() => setFilter(filterOption)}
+          >
+            <Text style={[
+              styles.filterText,
+              filter === filterOption && styles.activeFilterText
+            ]}>
+              {filterOption}
+            </Text>
+          </Pressable>
+        ))}
       </View>
 
-      {tasks.map(task => (
-        <View key={task.id} style={styles.taskCard}>
+      {filteredItems.map((item, index) => (
+        <View key={item.id} style={styles.taskCard}>
           <View style={styles.taskHeader}>
-            <Text style={styles.taskTitle}>{task.title}</Text>
+            <Text style={styles.taskTitle}>{item.title}</Text>
             <View style={[
               styles.priorityBadge,
-              task.priority === 'High' ? styles.highPriority : styles.mediumPriority
+              getPriorityStyles(item.priority).badge
             ]}>
               <Text style={[
                 styles.priorityText,
-                task.priority === 'High' ? styles.highPriorityText : styles.mediumPriorityText
-              ]}>{task.priority}</Text>
+                getPriorityStyles(item.priority).text
+              ]}>{item.priority}</Text>
             </View>
           </View>
 
           <View style={styles.taskDetails}>
             <View style={styles.detailItem}>
               <Calendar size={16} color="#64748b" />
-              <Text style={styles.detailText}>{task.deadline}</Text>
+              <Text style={styles.detailText}>{item.deadline}</Text>
             </View>
             <View style={styles.detailItem}>
               <Clock size={16} color="#64748b" />
-              <Text style={styles.detailText}>{task.timeRequired}</Text>
+              <Text style={styles.detailText}>{item.timeRequired}</Text>
             </View>
           </View>
 
           <View style={styles.taskActions}>
-            <Pressable style={styles.actionButton}>
-              <ArrowUp size={20} color="#2563EB" />
-              <Text style={styles.actionText}>Move Up</Text>
+            <Pressable 
+              style={[
+                styles.actionButton,
+                index === 0 && styles.disabledButton
+              ]}
+              onPress={() => moveItem(item.id, 'up')}
+              disabled={index === 0}
+            >
+              <ArrowUp size={20} color={index === 0 ? "#94a3b8" : "#2563EB"} />
+              <Text style={[
+                styles.actionText,
+                index === 0 && styles.disabledText
+              ]}>Move Up</Text>
             </Pressable>
-            <Pressable style={styles.actionButton}>
-              <ArrowDown size={20} color="#2563EB" />
-              <Text style={styles.actionText}>Move Down</Text>
+            <Pressable 
+              style={[
+                styles.actionButton,
+                index === filteredItems.length - 1 && styles.disabledButton
+              ]}
+              onPress={() => moveItem(item.id, 'down')}
+              disabled={index === filteredItems.length - 1}
+            >
+              <ArrowDown size={20} color={index === filteredItems.length - 1 ? "#94a3b8" : "#2563EB"} />
+              <Text style={[
+                styles.actionText,
+                index === filteredItems.length - 1 && styles.disabledText
+              ]}>Move Down</Text>
             </Pressable>
           </View>
         </View>
@@ -125,7 +167,6 @@ const styles = StyleSheet.create({
   },
   activeFilterText: {
     color: '#fff',
-    fontSize: 14,
     fontFamily: 'Inter-Regular',
   },
   taskCard: {
@@ -164,6 +205,9 @@ const styles = StyleSheet.create({
   mediumPriority: {
     backgroundColor: '#fef3c7',
   },
+  lowPriority: {
+    backgroundColor: '#dcfce7',
+  },
   priorityText: {
     fontSize: 12,
     fontFamily: 'Inter-SemiBold',
@@ -173,6 +217,9 @@ const styles = StyleSheet.create({
   },
   mediumPriorityText: {
     color: '#d97706',
+  },
+  lowPriorityText: {
+    color: '#16a34a',
   },
   taskDetails: {
     flexDirection: 'row',
@@ -200,10 +247,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   actionText: {
     color: '#2563EB',
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+  },
+  disabledText: {
+    color: '#94a3b8',
   },
 });

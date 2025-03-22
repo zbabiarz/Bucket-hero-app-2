@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, router } from 'expo-router';
-import { Mail, Lock, ArrowRight } from 'lucide-react-native';
+import { Mail, Lock, ArrowRight, Facebook } from 'lucide-react-native';
 import { useAuthStore } from '@/store/auth';
 
 export default function LoginScreen() {
@@ -24,6 +24,11 @@ export default function LoginScreen() {
     }
   };
 
+  const handleFacebookLogin = async () => {
+    // Facebook login implementation will go here
+    console.log('Facebook login pressed');
+  };
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -31,17 +36,18 @@ export default function LoginScreen() {
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Bucket</Text>
-            <Text style={styles.heroText}>Hero</Text>
+          <View style={styles.logoContainer}>
+            <View style={styles.bucketIcon}>
+              <View style={styles.bucketBody} />
+              <View style={styles.bucketHandle} />
+            </View>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Bucket</Text>
+              <Text style={styles.heroText}>Hero</Text>
+            </View>
           </View>
           <Text style={styles.subtitle}>Welcome back, adventurer!</Text>
         </View>
-
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=800&auto=format&fit=crop&q=60' }}
-          style={styles.heroImage}
-        />
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
@@ -82,6 +88,20 @@ export default function LoginScreen() {
             {!loading && <ArrowRight size={20} color="#fff" />}
           </Pressable>
 
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable 
+            style={styles.facebookButton}
+            onPress={handleFacebookLogin}
+          >
+            <Facebook size={20} color="#fff" />
+            <Text style={styles.facebookButtonText}>Continue with Facebook</Text>
+          </Pressable>
+
           <Link href="/signup" asChild>
             <Pressable style={styles.signupButton}>
               <Text style={styles.signupButtonText}>
@@ -109,20 +129,48 @@ const styles = StyleSheet.create({
     marginTop: 48,
     marginBottom: 32,
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  bucketIcon: {
+    width: 60,
+    height: 60,
+    marginBottom: 16,
+  },
+  bucketBody: {
+    position: 'absolute',
+    bottom: 0,
+    width: 60,
+    height: 45,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    transform: [{ perspective: 1000 }, { rotateX: '10deg' }],
+  },
+  bucketHandle: {
+    position: 'absolute',
+    top: 5,
+    left: 15,
+    width: 30,
+    height: 20,
+    borderWidth: 4,
+    borderColor: '#2563EB',
+    borderRadius: 10,
+    borderBottomWidth: 0,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 4,
-    marginBottom: 12,
   },
   title: {
-    fontSize: 40,
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     color: '#2563EB',
     letterSpacing: -1,
   },
   heroText: {
-    fontSize: 40,
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     color: '#7C3AED',
     letterSpacing: -1,
@@ -131,12 +179,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Inter-Regular',
     color: '#64748b',
-  },
-  heroImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 24,
-    marginBottom: 32,
   },
   form: {
     gap: 16,
@@ -172,12 +214,41 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
-    marginTop: 8,
   },
   loadingButton: {
     backgroundColor: '#93c5fd',
   },
   loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e2e8f0',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#64748b',
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+  },
+  facebookButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1877F2',
+    padding: 16,
+    borderRadius: 12,
+  },
+  facebookButtonText: {
     color: '#fff',
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',

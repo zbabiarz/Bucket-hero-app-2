@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Slot } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
@@ -26,18 +26,28 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  // Return null while fonts are loading to prevent layout flash
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
-  // While loading the user, show nothing
+  // Show loading state while checking authentication
   if (loading) {
-    return null;
+    return <Slot />;
   }
 
+  // Always render a Slot or Stack.Screen to ensure proper navigation
   return (
     <>
-      <Slot />
+      {user ? (
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      ) : (
+        // Use Slot for the auth flow
+        <Slot />
+      )}
       <StatusBar style="auto" />
     </>
   );

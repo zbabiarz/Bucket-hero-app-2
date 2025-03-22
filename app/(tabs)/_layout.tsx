@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { List, Sparkles, ArrowUpDown, Users } from 'lucide-react-native';
+import { List, Sparkles, ArrowUpDown, Users as Users2 } from 'lucide-react-native';
 import { useColorScheme } from 'react-native';
 
 export default function TabLayout() {
@@ -11,38 +11,47 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: isDark ? '#1A1B1E' : '#FFFFFF',
-          borderTopColor: isDark ? '#2C2D31' : '#E5E5E5',
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#E5E5E5',
+          borderTopWidth: 1,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
         tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: isDark ? '#A1A1AA' : '#71717A',
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarLabelStyle: {
+          fontFamily: 'Inter-Regular',
+          fontSize: 12,
+          marginTop: 4,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'My List',
-          tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <List size={size} color={color} strokeWidth={1.5} />,
         }}
       />
       <Tabs.Screen
         name="suggestions"
         options={{
           title: 'Suggestions',
-          tabBarIcon: ({ color, size }) => <Sparkles size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Sparkles size={size} color={color} strokeWidth={1.5} />,
         }}
       />
       <Tabs.Screen
         name="prioritize"
         options={{
           title: 'Prioritize',
-          tabBarIcon: ({ color, size }) => <ArrowUpDown size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <ArrowUpDown size={size} color={color} strokeWidth={1.5} />,
         }}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: 'Friends',
-          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Users2 size={size} color={color} strokeWidth={1.5} />,
         }}
       />
     </Tabs>

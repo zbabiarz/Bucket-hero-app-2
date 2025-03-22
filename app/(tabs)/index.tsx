@@ -4,58 +4,30 @@ import { Plus, Check } from 'lucide-react-native';
 import TaskModal from '@/components/TaskModal';
 import CompletionModal from '@/components/CompletionModal';
 import Header from '@/components/Header';
+import { useBucketListStore, type BucketItem } from '@/store/bucketList';
 
 export default function MyListScreen() {
-  const [selectedTask, setSelectedTask] = useState<{
-    id: number;
-    title: string;
-    difficulty: string;
-    completed: boolean;
-  } | null>(null);
-  
+  const { items, addItem, updateItem, deleteItem } = useBucketListStore();
+  const [selectedTask, setSelectedTask] = useState<BucketItem | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [newItem, setNewItem] = useState('');
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      title: "Visit the Northern Lights",
-      difficulty: "Medium",
-      completed: false,
-      photoUrl: null,
-    },
-    {
-      id: 2,
-      title: "Learn to play the piano",
-      difficulty: "Low",
-      completed: false,
-      photoUrl: null,
-    },
-    {
-      id: 3,
-      title: "Run a marathon",
-      difficulty: "High",
-      completed: false,
-      photoUrl: null,
-    }
-  ]);
 
   const handleAddItem = () => {
     if (newItem.trim()) {
-      const newItemObj = {
-        id: items.length + 1,
+      addItem({
         title: newItem.trim(),
-        difficulty: "Medium",
+        priority: "Medium",
+        deadline: "Not set",
+        timeRequired: "Not set",
         completed: false,
-        photoUrl: null,
-      };
-      setItems([...items, newItemObj]);
+      });
       setNewItem('');
     }
   };
 
   const handleDeleteItem = () => {
     if (selectedTask) {
-      setItems(items.filter(item => item.id !== selectedTask.id));
+      deleteItem(selectedTask.id);
       setSelectedTask(null);
     }
   };
@@ -65,24 +37,20 @@ export default function MyListScreen() {
       if (status === 'completed') {
         setShowCompletionModal(true);
       } else {
-        updateItemStatus(selectedTask.id, false);
+        updateItem(selectedTask.id, { completed: false });
+        setSelectedTask(null);
       }
     }
   };
 
-  const updateItemStatus = (itemId: number, completed: boolean, photoUrl?: string) => {
-    setItems(items.map(item => 
-      item.id === itemId 
-        ? { ...item, completed, photoUrl: photoUrl || item.photoUrl }
-        : item
-    ));
-    setSelectedTask(null);
-    setShowCompletionModal(false);
-  };
-
   const handleComplete = (photoUrl: string) => {
     if (selectedTask) {
-      updateItemStatus(selectedTask.id, true, photoUrl);
+      updateItem(selectedTask.id, {
+        completed: true,
+        completionPhotoUrl: photoUrl,
+      });
+      setSelectedTask(null);
+      setShowCompletionModal(false);
     }
   };
 
@@ -119,16 +87,16 @@ export default function MyListScreen() {
             </Text>
             <View style={[
               styles.difficultyBadge,
-              item.difficulty === 'High' ? styles.highDifficulty :
-              item.difficulty === 'Medium' ? styles.mediumDifficulty :
+              item.priority === 'High' ? styles.highDifficulty :
+              item.priority === 'Medium' ? styles.mediumDifficulty :
               styles.lowDifficulty
             ]}>
               <Text style={[
                 styles.difficultyText,
-                item.difficulty === 'High' ? styles.highDifficultyText :
-                item.difficulty === 'Medium' ? styles.mediumDifficultyText :
+                item.priority === 'High' ? styles.highDifficultyText :
+                item.priority === 'Medium' ? styles.mediumDifficultyText :
                 styles.lowDifficultyText
-              ]}>{item.difficulty}</Text>
+              ]}>{item.priority}</Text>
             </View>
           </Pressable>
         ))}
