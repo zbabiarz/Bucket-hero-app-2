@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
-import { Plus, Check } from 'lucide-react-native';
+import { Plus, Check, Clock } from 'lucide-react-native';
 import TaskModal from '@/components/TaskModal';
 import CompletionModal from '@/components/CompletionModal';
 import Header from '@/components/Header';
@@ -37,7 +37,7 @@ export default function MyListScreen() {
       if (status === 'completed') {
         setShowCompletionModal(true);
       } else {
-        updateItem(selectedTask.id, { completed: false });
+        updateItem(selectedTask.id, { status: 'in_progress', completed: false });
         setSelectedTask(null);
       }
     }
@@ -46,6 +46,7 @@ export default function MyListScreen() {
   const handleComplete = (photoUrl: string) => {
     if (selectedTask) {
       updateItem(selectedTask.id, {
+        status: 'completed',
         completed: true,
         completionPhotoUrl: photoUrl,
       });
@@ -76,13 +77,26 @@ export default function MyListScreen() {
         {items.map(item => (
           <Pressable
             key={item.id}
-            style={[styles.itemCard, item.completed && styles.completedCard]}
+            style={[
+              styles.itemCard,
+              item.status === 'completed' && styles.completedCard,
+              item.status === 'in_progress' && styles.inProgressCard
+            ]}
             onPress={() => setSelectedTask(item)}
           >
-            <View style={[styles.checkbox, item.completed && styles.checkedBox]}>
-              {item.completed && <Check size={16} color="#fff" />}
+            <View style={[
+              styles.checkbox,
+              item.status === 'completed' && styles.checkedBox,
+              item.status === 'in_progress' && styles.inProgressBox
+            ]}>
+              {item.status === 'completed' && <Check size={16} color="#fff" />}
+              {item.status === 'in_progress' && <Clock size={16} color="#fff" />}
             </View>
-            <Text style={[styles.itemTitle, item.completed && styles.completedTitle]}>
+            <Text style={[
+              styles.itemTitle,
+              item.status === 'completed' && styles.completedTitle,
+              item.status === 'in_progress' && styles.inProgressTitle
+            ]}>
               {item.title}
             </Text>
             <View style={[
@@ -172,6 +186,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     borderColor: '#cbd5e1',
   },
+  inProgressCard: {
+    backgroundColor: '#f0f9ff',
+    borderColor: '#7dd3fc',
+  },
   checkbox: {
     width: 24,
     height: 24,
@@ -186,6 +204,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     borderColor: '#2563EB',
   },
+  inProgressBox: {
+    backgroundColor: '#0ea5e9',
+    borderColor: '#0ea5e9',
+  },
   itemTitle: {
     flex: 1,
     fontSize: 16,
@@ -195,6 +217,9 @@ const styles = StyleSheet.create({
   completedTitle: {
     color: '#64748b',
     textDecorationLine: 'line-through',
+  },
+  inProgressTitle: {
+    color: '#0369a1',
   },
   difficultyBadge: {
     paddingHorizontal: 12,
